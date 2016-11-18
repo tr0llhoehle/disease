@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="de.tr0llhoehle.disease">
 
@@ -7,7 +8,22 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+        <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
 
+        <service
+            android:name=".LocationTracker"
+            android:enabled="true"
+            android:exported="true" />
+
+        <receiver
+            android:name=".OnBootReceiver"
+            android:enabled="true"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </receiver>
     </application>
 
 </manifest>
