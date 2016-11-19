@@ -17,7 +17,7 @@ public class OnBootReceiver extends BroadcastReceiver {
 
         // start tracking service on boot
         Intent trackingIntent;
-        trackingIntent = new Intent(context, de.tr0llhoehle.disease.LocationTracker.class);
+        trackingIntent = new Intent(context, LocationTracker.class);
         context.startService(trackingIntent);
     }
 }

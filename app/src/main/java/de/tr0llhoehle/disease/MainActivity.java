@@ -1,11 +1,17 @@
 package de.tr0llhoehle.disease;
 
+import de.tr0llhoehle.disease.LocationTracker;
+
+import android.content.Intent;
 import android.hardware.Camera;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.Window;
 import android.view.WindowManager;
+import android.view.Surface;
 
+
+import android.util.Log;
 import android.app.Activity;
 import android.os.Bundle;
 import android.os.Build;
@@ -15,6 +21,44 @@ import java.util.List;
 public class MainActivity extends Activity implements SurfaceHolder.Callback{
     Camera camera;
     SurfaceView preview;
+
+    private void setCameraDisplayOrientation() {
+        android.hardware.Camera.CameraInfo info =
+                new android.hardware.Camera.CameraInfo();
+        android.hardware.Camera.getCameraInfo(0, info);
+        int rotation = this.getWindowManager().getDefaultDisplay()
+                .getRotation();
+        int degrees = 0;
+        switch (rotation) {
+            case Surface.ROTATION_0: degrees = 0; break;
+            case Surface.ROTATION_90: degrees = 90; break;
+            case Surface.ROTATION_180: degrees = 180; break;
+            case Surface.ROTATION_270: degrees = 270; break;
+        }
+
+        int result;
+        if (info.facing == Camera.CameraInfo.CAMERA_FACING_FRONT) {
+            result = (info.orientation + degrees) % 360;
+            result = (360 - result) % 360;  // compensate the mirror
+        } else {  // back-facing
+            result = (info.orientation - degrees + 360) % 360;
+        }
+        camera.setDisplayOrientation(result);
+    }
+
+    private void tryInitializingCamera() {
+        if (camera == null) {
+            try {
+                camera = Camera.open();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+            setCameraDisplayOrientation();
+        }
+        camera.startPreview();
+    }
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,11 +75,16 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback{
             preview.getHolder().setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
         }
 
-        try {
-            camera = Camera.open();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        tryInitializingCamera();
+
+        Log.d("MainActivity", "starting tracker");
+        startService(new Intent(this, LocationTracker.class));
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        tryInitializingCamera();
     }
 
     @Override

@@ -21,7 +21,7 @@ public class LocationTracker extends Service implements GoogleApiClient.Connecti
     private static final int SEND_INTERVAL = 1000;
     private static final int UPDATE_INTERVAL = 1000;
     private static final int FASTEST_UPDATE_INTERVAL = 100;
-    private static final String TAG = "location tracker";
+    private static final String TAG = "LocationTracker";
 
     private GoogleApiClient googleClient;
     private ArrayList<Location> bufferedLocations;
@@ -29,11 +29,17 @@ public class LocationTracker extends Service implements GoogleApiClient.Connecti
     private long lastFlush = 0;
 
     public LocationTracker() {
+        bufferedLocations = new ArrayList<>();
+    }
+
+    private void initializeGoogle() {
         this.googleClient = new GoogleApiClient.Builder(this)
                 .addApi(LocationServices.API)
                 .addConnectionCallbacks(this)
                 .addOnConnectionFailedListener(this)
                 .build();
+        Log.d(TAG, "connecting");
+
         this.googleClient.connect();
     }
 
@@ -54,8 +60,6 @@ public class LocationTracker extends Service implements GoogleApiClient.Connecti
 
     @Override
     public synchronized void onLocationChanged(Location location) {
-        Log.d(TAG, "Location update!");
-
         addToBuffer(location);
     }
 
@@ -68,7 +72,7 @@ public class LocationTracker extends Service implements GoogleApiClient.Connecti
     public synchronized void onConnected(Bundle bundle) {
         Log.d(TAG, "Connected");
 
-        locationHandlerThread = new HandlerThread("Location Handler Thread", android.os.Process.THREAD_PRIORITY_BACKGROUND);
+        locationHandlerThread = new HandlerThread("LocationTrackerHandler", android.os.Process.THREAD_PRIORITY_BACKGROUND);
         locationHandlerThread.start();
 
         LocationRequest req;
@@ -85,12 +89,23 @@ public class LocationTracker extends Service implements GoogleApiClient.Connecti
     public synchronized void onConnectionSuspended(int value) {
         Log.d(TAG, "Connection suspended");
 
-        googleClient.connect();
+        if (googleClient != null) {
+            googleClient.connect();
+        }
     }
 
     @Override
     public synchronized IBinder onBind(Intent intent) {
+        Log.d(TAG, "onBind");
+        if (googleClient == null) initializeGoogle();
         return null;
+    }
+
+    @Override
+    public synchronized int onStartCommand(Intent intent, int flags, int startId) {
+        Log.d(TAG, "onStartCommand");
+        if (googleClient == null) initializeGoogle();
+        return START_STICKY;
     }
 
 }
