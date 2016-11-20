@@ -4,8 +4,9 @@
   "description": "Server backend for disease",
   "main": "backend/index.js",
   "scripts": {
-    "start": "node backend/app.js",
-    "test": "node backend/test/update_v1_test.js"
+    "start": "node app.js",
+    "deploy": "./scripts/deploy.sh",
+    "test": "node est/update_v1_test.js"
   },
   "repository": {
     "type": "git",

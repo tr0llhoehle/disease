@@ -3,10 +3,11 @@
 const app = require('.');
 const sqlite3 = require('sqlite3')
 
-let config = {db_file: 'db_staging.sqlite', host: 'localhost', port: 5000}
-if (process.env.DISEASE_PRODUCTION)
+let config = {db_file: 'db_staging.sqlite', host: '0.0.0.0', port: process.env.PORT || 5000}
+if (process.env.DEPLOY_TYPE == "Production")
 {
-  config = {db_file: 'db_production.sqlite', host: '0.0.0.0', port: 80}
+  console.error("WARNING: Using production credentials!");
+  config.db_file = 'db_production.sqlite';
 }
 
 app(config, (error, server) => {
