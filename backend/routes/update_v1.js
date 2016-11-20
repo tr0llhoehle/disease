@@ -6,7 +6,7 @@ class Update {
   }
 
   setup(callback) {
-    db.run('CREATE TABLE IF NOT EXISTS locations (uid INTEGER, timestamp BIGINT, lon FLOAT, lat FLOAT) PRIMARY KEY (uid, timestamp)', callback);
+    this._db.run('CREATE TABLE IF NOT EXISTS locations (uid INTEGER, timestamp BIGINT, lon FLOAT, lat FLOAT, PRIMARY KEY (uid, timestamp))', callback);
   }
 
   insert(uid, records) {

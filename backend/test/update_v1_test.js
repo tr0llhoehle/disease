@@ -7,7 +7,9 @@ const request = require('request');
 const config = {db_file: ':memory:', host: 'localhost', port: 5000};
 const url = `http://${config.host}:${config.port}/update/v1`;
 
-app(config, (server) => {
+app(config, (error, server) => {
+  if (error) throw error;
+
   test('send update', (t) => {
     t.plan(2);
     let query = {
@@ -26,7 +28,9 @@ app(config, (server) => {
     })
   });
 
-
-  server.close();
+  test('teardown', (t) => {
+    server.close();
+    t.end();
+  });
 });
 

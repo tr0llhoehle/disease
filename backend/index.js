@@ -32,12 +32,16 @@ module.exports = (config, callback) => {
   app.post('/update/v1/:uid', body_parser, update_v1.handle.bind(update_v1));
 
   let q = d3.queue(1);
-  q.defer(update_v1.setup);
+  q.defer(update_v1.setup.bind(update_v1));
 
   q.awaitAll((error) => {
-    if (error) return;
+    if (error) return callback(error);
 
-    callback(app.listen(config.port , config.host));
-    db.close();
+    let server = app.listen(config.port , config.host);
+    server.on('close', () => {
+      db.close();
+    });
+
+    return callback(null, server);
   });
 };

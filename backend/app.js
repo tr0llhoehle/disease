@@ -9,7 +9,9 @@ if (process.env.DISEASE_PRODUCTION)
   config = {db_file: 'db_production.sqlite', host: '0.0.0.0', port: 80}
 }
 
-app(config, (server) => {
+app(config, (error, server) => {
+  if (error) throw error;
+
   console.error("running.");
 });
 
