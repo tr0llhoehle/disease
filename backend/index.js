@@ -19,16 +19,6 @@ module.exports = (config, callback) => {
   app.use(compression());
   app.use(cors({ maxAge: 3600e3, origin: '*' }));
 
-  app.param('uid', function (req, res, next, id) {
-    if (parseInt(id) > 0) {
-      next();
-    }
-    else {
-      res.json({error: "invalid_uid", message: "uid " + id + " must be an integer bigger then 0"});
-      res.sendStatus(403);
-    }
-  });
-
   app.post('/update/v1/:uid', body_parser, update_v1.handle.bind(update_v1));
 
   let q = d3.queue(1);

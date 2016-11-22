@@ -13,6 +13,6 @@ if (process.env.DEPLOY_TYPE == "Production")
 app(config, (error, server) => {
   if (error) throw error;
 
-  console.error("running.");
+  console.error("running on port " + config.port);
 });
 

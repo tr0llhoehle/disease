@@ -15,10 +15,33 @@ class Update {
     statement.finalize();
   }
 
-  handle(req, res) {
-    this.insert(req.params.uid, req.body.update.records)
+  _validate(body, response) {
+    if (!body) {
+      response.error = "InvalidRequest";
+      response.message = "Not a valid json message.";
+      return false;
+    }
+    if (!body.update) {
+      response.error = "InvalidRequest";
+      response.message = "No update property";
+      return false;
+    }
+    if (!Array.isArray(body.update.records)) {
+      response.error = "InvalidRequest";
+      response.message = "`records` is not an array";
+      return false;
+    }
+    return true;
+  }
 
+  handle(req, res) {
     let response = {};
+    if (!this._validate(req.body, response)) {
+      res.status(400);
+    } else {
+      this.insert(req.params.uid, req.body.update.records)
+    }
+
     res.json(response);
   }
 };
