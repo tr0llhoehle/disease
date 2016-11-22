@@ -2,6 +2,7 @@ package de.tr0llhoehle.disease;
 
 import android.location.Location;
 import android.content.Context;
+import android.util.Log;
 
 import com.google.gson.*;
 import com.koushikdutta.async.future.FutureCallback;
@@ -21,6 +22,8 @@ class GameModel {
     private String user_id;
     private ArrayList<State> states_to_sync;
     private State current_state;
+    private static final String TAG = "GameModel";
+
 
     class State {
         State(long timestamp, double lon, double lat) {
@@ -42,11 +45,14 @@ class GameModel {
     }
 
     private void syncState() {
+        Log.d(TAG, "Sync state?");
         if (states_to_sync.size() == 0) return;
 
         State last_state = states_to_sync.get(states_to_sync.size() - 1);
         if (System.currentTimeMillis() - last_state.timestamp < SYNC_INTERVAL)
             return;
+
+        Log.d(TAG, "Syncing!");
 
         JsonObject json = new JsonObject();
         JsonObject update = new JsonObject();
@@ -66,13 +72,21 @@ class GameModel {
         }
         states_to_sync.clear();
 
+        String query = this.server + "/update/v1/" + user_id;
+
+        Log.d(TAG, query);
+
         Ion.with(this.context)
-                .load(this.server + "update/v1/" + user_id)
+                .load(query)
                 .setJsonObjectBody(json)
                 .asJsonObject()
                 .setCallback(new FutureCallback<JsonObject>() {
                     @Override
                     public void onCompleted(Exception e, JsonObject result) {
+                        if (e != null) {
+                            e.printStackTrace();
+                            return;
+                        }
                         // todo update internal state to server state
                     }
                 });

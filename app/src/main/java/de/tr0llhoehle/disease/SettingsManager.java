@@ -3,6 +3,7 @@ package de.tr0llhoehle.disease;
 import android.content.SharedPreferences;
 import android.provider.Settings;
 import android.content.Context;
+import android.util.Log;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -13,22 +14,29 @@ import java.security.NoSuchAlgorithmException;
  */
 
 final class SettingsManager {
+    private static final String TAG = "SettingsManager";
     public static final String APP_PREFS = "DiseasePrefs";
     SharedPreferences settings;
 
 
     SettingsManager(Context context) {
-         this.settings = context.getSharedPreferences(APP_PREFS, 0);
+        this.settings = context.getSharedPreferences(APP_PREFS, 0);
 
         String uid = this.settings.getString("uid", "");
         if (uid.equals("")) {
             try {
-                uid = getHash(Settings.Secure.ANDROID_ID);
+                String shorted_hash = getHash(Settings.Secure.ANDROID_ID).substring(0, 8);
+
+                // we save this as string because that is what we will need for queries
+                uid = Long.toString(Long.parseLong(shorted_hash, 16));
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }
-        this.settings.edit().putString("uid", uid);
+
+        this.settings.edit()
+                     .putString("uid", uid)
+                     .apply();
     }
 
     public String getUserId() {
