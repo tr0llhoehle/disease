@@ -1,7 +1,5 @@
 package de.tr0llhoehle.disease;
 
-import de.tr0llhoehle.disease.LocationTracker;
-
 import android.content.Intent;
 import android.hardware.Camera;
 import android.view.SurfaceHolder;
@@ -9,16 +7,19 @@ import android.view.SurfaceView;
 import android.view.Window;
 import android.view.WindowManager;
 import android.view.Surface;
+import android.content.SharedPreferences;
 
-
-import android.util.Log;
 import android.app.Activity;
 import android.os.Bundle;
 import android.os.Build;
+import android.provider.Settings.Secure;
 
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.List;
 
-public class MainActivity extends Activity implements SurfaceHolder.Callback{
+public class MainActivity extends Activity implements SurfaceHolder.Callback {
+
     Camera camera;
     SurfaceView preview;
 
@@ -60,6 +61,11 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback{
     }
 
 
+
+    private void initializeSettings() {
+
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -76,8 +82,8 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback{
         }
 
         tryInitializingCamera();
+        initializeSettings();
 
-        Log.d("MainActivity", "starting tracker");
         startService(new Intent(this, LocationTracker.class));
     }
 

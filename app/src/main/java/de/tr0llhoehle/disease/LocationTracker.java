@@ -14,22 +14,18 @@ import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.Bundle;
 
-import java.util.ArrayList;
-
 public class LocationTracker extends Service implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener {
     // all values in milliseconds
-    private static final int SEND_INTERVAL = 1000;
     private static final int UPDATE_INTERVAL = 1000;
     private static final int FASTEST_UPDATE_INTERVAL = 100;
     private static final String TAG = "LocationTracker";
 
     private GoogleApiClient googleClient;
-    private ArrayList<Location> bufferedLocations;
     private HandlerThread locationHandlerThread;
-    private long lastFlush = 0;
+    private SettingsManager settings;
+    private GameModel model;
 
     public LocationTracker() {
-        bufferedLocations = new ArrayList<>();
     }
 
     private void initializeGoogle() {
@@ -43,24 +39,17 @@ public class LocationTracker extends Service implements GoogleApiClient.Connecti
         this.googleClient.connect();
     }
 
-    private void sendBuffer() {
-        /* TODO implement sending over HTTP */
-        bufferedLocations.clear();
-    }
-
-    private void addToBuffer(Location location) {
-        bufferedLocations.add(location);
-
-        if (location.getTime() - lastFlush > SEND_INTERVAL) {
-            sendBuffer();
-            bufferedLocations.clear();
-            lastFlush = location.getTime();
-        }
+    @Override
+    public void onCreate() {
+        settings = new SettingsManager(getApplicationContext());
+        model = new GameModel(getApplicationContext(), "http://192.169.178.189:5000", settings.getUserId());
     }
 
     @Override
     public synchronized void onLocationChanged(Location location) {
-        addToBuffer(location);
+        Log.d(TAG, "update");
+
+        this.model.setLocation(location);
     }
 
     @Override
