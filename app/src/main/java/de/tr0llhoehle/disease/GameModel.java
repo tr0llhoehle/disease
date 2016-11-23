@@ -2,7 +2,6 @@ package de.tr0llhoehle.disease;
 
 import android.location.Location;
 import android.content.Context;
-import android.util.Log;
 
 import com.google.gson.*;
 import com.koushikdutta.async.future.FutureCallback;
@@ -45,14 +44,11 @@ class GameModel {
     }
 
     private void syncState() {
-        Log.d(TAG, "Sync state?");
         if (states_to_sync.size() == 0) return;
 
         State last_state = states_to_sync.get(states_to_sync.size() - 1);
         if (System.currentTimeMillis() - last_state.timestamp < SYNC_INTERVAL)
             return;
-
-        Log.d(TAG, "Syncing!");
 
         JsonObject json = new JsonObject();
         JsonObject update = new JsonObject();
@@ -73,8 +69,6 @@ class GameModel {
         states_to_sync.clear();
 
         String query = this.server + "/update/v1/" + user_id;
-
-        Log.d(TAG, query);
 
         Ion.with(this.context)
                 .load(query)

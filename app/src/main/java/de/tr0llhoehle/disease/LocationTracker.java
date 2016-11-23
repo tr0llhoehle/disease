@@ -34,7 +34,6 @@ public class LocationTracker extends Service implements GoogleApiClient.Connecti
                 .addConnectionCallbacks(this)
                 .addOnConnectionFailedListener(this)
                 .build();
-        Log.d(TAG, "connecting");
 
         this.googleClient.connect();
     }
@@ -42,25 +41,21 @@ public class LocationTracker extends Service implements GoogleApiClient.Connecti
     @Override
     public void onCreate() {
         settings = new SettingsManager(getApplicationContext());
-        model = new GameModel(getApplicationContext(), "http://192.168.178.189:5000", settings.getUserId());
+        model = new GameModel(getApplicationContext(), "http://tr0llhoehle.de:5000", settings.getUserId());
     }
 
     @Override
     public synchronized void onLocationChanged(Location location) {
-        Log.d(TAG, "update");
-
         this.model.setLocation(location);
     }
 
     @Override
     public synchronized void onConnectionFailed(ConnectionResult result) {
-        Log.d(TAG, "Connection failed");
+        Log.w(TAG, "Connection to google client failed");
     }
 
     @Override
     public synchronized void onConnected(Bundle bundle) {
-        Log.d(TAG, "Connected");
-
         locationHandlerThread = new HandlerThread("LocationTrackerHandler", android.os.Process.THREAD_PRIORITY_BACKGROUND);
         locationHandlerThread.start();
 
@@ -69,15 +64,11 @@ public class LocationTracker extends Service implements GoogleApiClient.Connecti
         req.setInterval(UPDATE_INTERVAL);
         req.setFastestInterval(FASTEST_UPDATE_INTERVAL);
 
-        Log.d(TAG, "Starting updates");
-
         LocationServices.FusedLocationApi.requestLocationUpdates(googleClient, req, this, locationHandlerThread.getLooper());
     }
 
     @Override
     public synchronized void onConnectionSuspended(int value) {
-        Log.d(TAG, "Connection suspended");
-
         if (googleClient != null) {
             googleClient.connect();
         }
@@ -85,14 +76,12 @@ public class LocationTracker extends Service implements GoogleApiClient.Connecti
 
     @Override
     public synchronized IBinder onBind(Intent intent) {
-        Log.d(TAG, "onBind");
         if (googleClient == null) initializeGoogle();
         return null;
     }
 
     @Override
     public synchronized int onStartCommand(Intent intent, int flags, int startId) {
-        Log.d(TAG, "onStartCommand");
         if (googleClient == null) initializeGoogle();
         return START_STICKY;
     }

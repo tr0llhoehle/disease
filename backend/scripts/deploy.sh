@@ -9,6 +9,6 @@ DEPLOY_TYPE=${1:-"Staging"}
 PORT=5000
 
 sudo docker build -t ${IMAGE} --build-arg DEPLOY_TYPE=${DEPLOY_TYPE} .
-docker save tr0llhoehle/disease:${VERSION} | bzip2 | pv | ssh tr0llhoehle.de 'bunzip2 | docker load'
-ssh tr0llhoehle.de -c "docker run ${IMAGE} --expose ${PORT}"
+sudo docker save ${IMAGE} | bzip2 | pv | ssh tr0llhoehle.de 'bunzip2 | docker load'
+ssh tr0llhoehle.de "docker run -d --expose ${PORT} --restart=on-failure ${IMAGE} npm run start"
 

@@ -3,7 +3,6 @@ package de.tr0llhoehle.disease;
 import android.content.SharedPreferences;
 import android.provider.Settings;
 import android.content.Context;
-import android.util.Log;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;

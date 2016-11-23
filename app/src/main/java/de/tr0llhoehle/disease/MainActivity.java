@@ -7,15 +7,11 @@ import android.view.SurfaceView;
 import android.view.Window;
 import android.view.WindowManager;
 import android.view.Surface;
-import android.content.SharedPreferences;
 
 import android.app.Activity;
 import android.os.Bundle;
 import android.os.Build;
-import android.provider.Settings.Secure;
 
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.List;
 
 public class MainActivity extends Activity implements SurfaceHolder.Callback {
@@ -47,7 +43,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback {
         camera.setDisplayOrientation(result);
     }
 
-    private void tryInitializingCamera() {
+    private void tryInitializingCamera(boolean retry) {
         if (camera == null) {
             try {
                 camera = Camera.open();
@@ -57,14 +53,15 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback {
 
             setCameraDisplayOrientation();
         }
-        camera.startPreview();
+        try {
+            camera.startPreview();
+        }catch (Exception e) {
+            camera = null;
+            if (retry)
+                tryInitializingCamera(false);
+        }
     }
 
-
-
-    private void initializeSettings() {
-
-    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -81,8 +78,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback {
             preview.getHolder().setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
         }
 
-        tryInitializingCamera();
-        initializeSettings();
+        tryInitializingCamera(true);
 
         startService(new Intent(this, LocationTracker.class));
     }
@@ -90,7 +86,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback {
     @Override
     public void onResume() {
         super.onResume();
-        tryInitializingCamera();
+        tryInitializingCamera(true);
     }
 
     @Override
