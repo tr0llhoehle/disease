@@ -11,11 +11,12 @@ import android.view.Surface;
 import android.app.Activity;
 import android.os.Bundle;
 import android.os.Build;
+import android.util.Log;
 
 import java.util.List;
 
 public class MainActivity extends Activity implements SurfaceHolder.Callback {
-
+    static final String TAG = "MainActivity";
     Camera camera;
     SurfaceView preview;
 
@@ -47,11 +48,10 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback {
         if (camera == null) {
             try {
                 camera = Camera.open();
+                setCameraDisplayOrientation();
             } catch (Exception e) {
                 e.printStackTrace();
             }
-
-            setCameraDisplayOrientation();
         }
         try {
             camera.startPreview();
@@ -94,6 +94,8 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback {
         super.onPause();
         if (camera != null) {
             camera.stopPreview();
+            camera.release();
+            camera = null;
         }
     }
 
@@ -102,6 +104,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback {
         super.onDestroy();
         if (camera != null) {
             camera.release();
+            camera = null;
         }
     }
 
@@ -124,7 +127,9 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback {
     @Override
     public void surfaceCreated(SurfaceHolder holder) {
         try {
-            camera.setPreviewDisplay(preview.getHolder());
+            if (camera != null) {
+                camera.setPreviewDisplay(preview.getHolder());
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
