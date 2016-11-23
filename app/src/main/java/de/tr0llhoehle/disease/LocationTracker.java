@@ -19,6 +19,9 @@ public class LocationTracker extends Service implements GoogleApiClient.Connecti
     private static final int UPDATE_INTERVAL = 1000;
     private static final int FASTEST_UPDATE_INTERVAL = 100;
     private static final String TAG = "LocationTracker";
+    private static final String SERVER_STAGING = "http://192.168.178.189:5000";
+    private static final String SERVER_PRODUCTION = "http://tr0llhoehle.de:5000";
+
 
     private GoogleApiClient googleClient;
     private HandlerThread locationHandlerThread;
@@ -41,7 +44,7 @@ public class LocationTracker extends Service implements GoogleApiClient.Connecti
     @Override
     public void onCreate() {
         settings = new SettingsManager(getApplicationContext());
-        model = new GameModel(getApplicationContext(), "http://tr0llhoehle.de:5000", settings.getUserId());
+        model = new GameModel(getApplicationContext(), SERVER_PRODUCTION, settings.getUserId());
     }
 
     @Override

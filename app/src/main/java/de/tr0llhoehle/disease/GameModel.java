@@ -2,6 +2,7 @@ package de.tr0llhoehle.disease;
 
 import android.location.Location;
 import android.content.Context;
+import android.util.Log;
 
 import com.google.gson.*;
 import com.koushikdutta.async.future.FutureCallback;
@@ -61,9 +62,9 @@ class GameModel {
 
         for (State state : states_to_sync) {
             JsonArray record  = new JsonArray();
-            gson.toJson(gson.toJsonTree(state.lon));
-            gson.toJson(gson.toJsonTree(state.lat));
-            gson.toJson(gson.toJsonTree(state.timestamp));
+            record.add(gson.toJsonTree(state.lon));
+            record.add(gson.toJsonTree(state.lat));
+            record.add(gson.toJsonTree(state.timestamp));
             records.add(record);
         }
         states_to_sync.clear();
