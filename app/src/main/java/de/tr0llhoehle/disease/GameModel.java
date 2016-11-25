@@ -8,6 +8,8 @@ import com.google.gson.*;
 import com.koushikdutta.async.future.FutureCallback;
 import com.koushikdutta.ion.Ion;
 
+import org.json.JSONObject;
+
 import java.util.ArrayList;
 
 /**
@@ -26,15 +28,21 @@ class GameModel {
 
 
     class State {
-        State(long timestamp, double lon, double lat) {
+        State(long timestamp, double lon, double lat, double speed, double bearing, double accuracy) {
             this.timestamp = timestamp;
             this.lon = lon;
             this.lat = lat;
+            this.speed = speed;
+            this.bearing = bearing;
+            this.accuracy = accuracy;
         }
 
         public long timestamp;
         public double lon;
         public double lat;
+        public double speed;
+        public double bearing;
+        public double accuracy;
     };
 
     GameModel(Context context, String server, String user_id) {
@@ -52,24 +60,24 @@ class GameModel {
             return;
 
         JsonObject json = new JsonObject();
-        JsonObject update = new JsonObject();
         JsonArray records = new JsonArray();
-
-        json.add("update", update);
-        update.add("records", records);
+        json.add("records", records);
 
         Gson gson = new GsonBuilder().create();
 
         for (State state : states_to_sync) {
-            JsonArray record  = new JsonArray();
-            record.add(gson.toJsonTree(state.lon));
-            record.add(gson.toJsonTree(state.lat));
-            record.add(gson.toJsonTree(state.timestamp));
+            JsonObject record  = new JsonObject();
+            record.add("lon", gson.toJsonTree(state.lon));
+            record.add("lat", gson.toJsonTree(state.lat));
+            record.add("timestamp", gson.toJsonTree(state.timestamp));
+            record.add("speed", gson.toJsonTree(state.speed));
+            record.add("bearing", gson.toJsonTree(state.bearing));
+            record.add("accuracy", gson.toJsonTree(state.accuracy));
             records.add(record);
         }
         states_to_sync.clear();
 
-        String query = this.server + "/update/v1/" + user_id;
+        String query = this.server + "/update/v2/" + user_id;
 
         Ion.with(this.context)
                 .load(query)
@@ -88,7 +96,9 @@ class GameModel {
     }
 
     public synchronized void setLocation(Location location) {
-        this.current_state = new State(location.getTime(), location.getLongitude(), location.getLatitude());
+        this.current_state = new State(location.getTime(), location.getLongitude(),
+                location.getLatitude(), location.getSpeed(), location.getBearing(),
+                location.getAccuracy());
         states_to_sync.add(this.current_state);
         syncState();
     }

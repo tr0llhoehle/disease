@@ -44,7 +44,7 @@ public class LocationTracker extends Service implements GoogleApiClient.Connecti
     @Override
     public void onCreate() {
         settings = new SettingsManager(getApplicationContext());
-        model = new GameModel(getApplicationContext(), SERVER_PRODUCTION, settings.getUserId());
+        model = new GameModel(getApplicationContext(), BuildConfig.DEBUG ? SERVER_STAGING : SERVER_PRODUCTION, settings.getUserId());
     }
 
     @Override
