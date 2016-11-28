@@ -1,7 +1,4 @@
-FROM node:4.6-slim
-
-ARG DEPLOY_TYPE
-ARG NODE_VERSION
+FROM node:4.6-alpine
 
 RUN mkdir -p /usr/local/src/app
 COPY . /usr/local/src/app
