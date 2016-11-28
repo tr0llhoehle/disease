@@ -25,16 +25,17 @@ class GameModel {
     private ArrayList<State> states_to_sync;
     private State current_state;
     private static final String TAG = "GameModel";
-
+    private LocationFilter filter;
 
     class State {
-        State(long timestamp, double lon, double lat, double speed, double bearing, double accuracy) {
+        State(long timestamp, double lon, double lat, double speed, double bearing, double accuracy, boolean valid) {
             this.timestamp = timestamp;
             this.lon = lon;
             this.lat = lat;
             this.speed = speed;
             this.bearing = bearing;
             this.accuracy = accuracy;
+            this.valid = valid;
         }
 
         public long timestamp;
@@ -43,12 +44,14 @@ class GameModel {
         public double speed;
         public double bearing;
         public double accuracy;
+        public boolean valid;
     };
 
     GameModel(Context context, String server, String user_id) {
         this.server = server;
         this.context = context;
         this.user_id = user_id;
+        this.filter = new LocationFilter();
         this.states_to_sync = new ArrayList<>();
     }
 
@@ -79,6 +82,8 @@ class GameModel {
 
         String query = this.server + "/update/v2/" + user_id;
 
+        Log.d(TAG, query);
+
         Ion.with(this.context)
                 .load(query)
                 .setJsonObjectBody(json)
@@ -96,10 +101,16 @@ class GameModel {
     }
 
     public synchronized void setLocation(Location location) {
+        boolean valid = filter.useLocation(location.getLongitude(), location.getLatitude());
+
         this.current_state = new State(location.getTime(), location.getLongitude(),
-                location.getLatitude(), location.getSpeed(), location.getBearing(),
-                location.getAccuracy());
-        states_to_sync.add(this.current_state);
+                    location.getLatitude(), location.getSpeed(), location.getBearing(),
+                    location.getAccuracy(), valid);
+        if (valid) {
+            states_to_sync.add(this.current_state);
+        } else {
+            Log.d(TAG, "Filtering location");
+        }
         syncState();
     }
 

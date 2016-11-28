@@ -19,6 +19,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback {
     static final String TAG = "MainActivity";
     Camera camera;
     SurfaceView preview;
+    GameModel model;
 
     private void setCameraDisplayOrientation() {
         android.hardware.Camera.CameraInfo info =
@@ -79,7 +80,6 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback {
         }
 
         tryInitializingCamera(true);
-
         startService(new Intent(this, LocationTracker.class));
     }
 
