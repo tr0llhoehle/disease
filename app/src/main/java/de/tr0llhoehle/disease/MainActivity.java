@@ -7,6 +7,7 @@ import android.view.SurfaceView;
 import android.view.Window;
 import android.view.WindowManager;
 import android.view.Surface;
+import android.view.View;
 
 import android.app.Activity;
 import android.os.Bundle;
@@ -87,11 +88,13 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback {
     public void onResume() {
         super.onResume();
         tryInitializingCamera(true);
+        preview.setVisibility(View.VISIBLE);
     }
 
     @Override
     public void onPause() {
         super.onPause();
+        preview.setVisibility(View.GONE);
         if (camera != null) {
             camera.stopPreview();
             camera.release();
