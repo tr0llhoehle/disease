@@ -64,6 +64,18 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback {
         }
     }
 
+    public void changeCameraEffect(View view) {
+        Camera.Parameters params;
+        params = camera.getParameters();
+
+        if(params.getColorEffect().equals(Camera.Parameters.EFFECT_SEPIA)) {
+            params.setColorEffect(Camera.Parameters.EFFECT_NONE);
+        } else {
+            params.setColorEffect(Camera.Parameters.EFFECT_SEPIA);
+        }
+        camera.setParameters(params);
+    }
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
