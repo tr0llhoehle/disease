@@ -117,4 +117,12 @@ class GameModel {
     public synchronized State getState() {
         return current_state;
     }
+
+    public String getServer() {
+        return server;
+    }
+
+    public String getUser_id() {
+        return user_id;
+    }
 }

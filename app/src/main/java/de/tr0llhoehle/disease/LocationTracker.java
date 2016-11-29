@@ -26,7 +26,7 @@ public class LocationTracker extends Service implements GoogleApiClient.Connecti
     private GoogleApiClient googleClient;
     private HandlerThread locationHandlerThread;
     private SettingsManager settings;
-    private GameModel model;
+    private static GameModel model;
 
     public LocationTracker() {
     }
@@ -39,6 +39,10 @@ public class LocationTracker extends Service implements GoogleApiClient.Connecti
                 .build();
 
         this.googleClient.connect();
+    }
+
+    public static GameModel getModel() {
+        return model;
     }
 
     @Override

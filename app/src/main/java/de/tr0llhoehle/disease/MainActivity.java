@@ -2,12 +2,14 @@ package de.tr0llhoehle.disease;
 
 import android.content.Intent;
 import android.hardware.Camera;
+import android.os.Handler;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.Window;
 import android.view.WindowManager;
 import android.view.Surface;
 import android.view.View;
+import android.widget.TextView;
 
 import android.app.Activity;
 import android.os.Bundle;
@@ -21,6 +23,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback {
     Camera camera;
     SurfaceView preview;
     GameModel model;
+    Handler handler;
 
     private void setCameraDisplayOrientation() {
         android.hardware.Camera.CameraInfo info =
@@ -76,6 +79,38 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback {
         camera.setParameters(params);
     }
 
+    Runnable refreshDebugDisplay = new Runnable() {
+        @Override
+        public void run() {
+            try {
+                TextView text = (TextView)findViewById(R.id.debug_display);
+
+                GameModel gm = LocationTracker.getModel();
+                GameModel.State state = gm.getState();
+
+                long timediff = (System.currentTimeMillis() - state.timestamp) / 1000;
+                text.setText("Server: " + gm.getServer() + "\n" +
+                        "UserID: " + gm.getUser_id() + "\n" +
+                        "Lat: " + state.lat + "\n" +
+                        "Lon: " + state.lon + "\n" +
+                        "Updated : " + timediff + "s ago\n");
+            } finally {
+                handler.postDelayed(refreshDebugDisplay, 1000);
+            }
+        }
+    };
+
+    public void toggleDebugDisplay(View view) {
+        TextView text = (TextView)findViewById(R.id.debug_display);
+
+        if(text.getVisibility() == View.GONE) {
+            refreshDebugDisplay.run();
+            text.setVisibility(View.VISIBLE);
+        } else {
+            handler.removeCallbacks(refreshDebugDisplay);
+            text.setVisibility(View.GONE);
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -91,6 +126,8 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback {
         if(Build.VERSION.SDK_INT < Build.VERSION_CODES.HONEYCOMB) {
             preview.getHolder().setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
         }
+
+        handler = new Handler();
 
         tryInitializingCamera(true);
         startService(new Intent(this, LocationTracker.class));
@@ -121,6 +158,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback {
             camera.release();
             camera = null;
         }
+        handler.removeCallbacks(refreshDebugDisplay);
     }
 
     @Override
