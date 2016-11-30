@@ -44,6 +44,7 @@ public class LocationTracker extends Service implements GoogleApiClient.Connecti
     @Override
     public void onCreate() {
         settings = new SettingsManager(getApplicationContext());
+        startService(new Intent(LocationTracker.this, SyncService.class));
     }
 
     @Override
@@ -51,10 +52,11 @@ public class LocationTracker extends Service implements GoogleApiClient.Connecti
         if (filter.useLocation(location)) {
             Record record = new Record(location);
 
+            Log.d(TAG, "sending record update");
             LocalBroadcastManager manager = LocalBroadcastManager.getInstance(getApplicationContext());
             Intent update = new Intent(UPDATE_RECORD);
-            update.putExtra("state", record);
-            manager.sendBroadcast(new Intent(UPDATE_RECORD));
+            update.putExtra("record", record);
+            manager.sendBroadcast(update);
         }
     }
 

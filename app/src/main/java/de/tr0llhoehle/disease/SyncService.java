@@ -1,8 +1,12 @@
 package de.tr0llhoehle.disease;
 
+import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.Intent;
 import android.content.Context;
+import android.content.IntentFilter;
+import android.os.IBinder;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 import com.google.gson.Gson;
@@ -14,13 +18,41 @@ import com.koushikdutta.ion.Ion;
 
 import java.util.ArrayList;
 
-public class SyncService extends BroadcastReceiver {
+public class SyncService extends Service {
     public static final String NEW_REMOTE_STATE = "NEW_REMOTE_STATE";
     private static final String TAG = "SyncService";
 
     private ArrayList<Record> send_buffer = new ArrayList<>();
+    private BroadcastReceiver location_receiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            switch (intent.getAction()) {
+                case LocationTracker.UPDATE_RECORD:
+                    send_buffer.add((Record) intent.getParcelableExtra("record"));
+                    send(context);
+                    break;
+            }
+        }
+    };
 
-    private void send(final Context context) {
+    @Override
+    public synchronized IBinder onBind(Intent intent) {
+        return null;
+    }
+
+    @Override
+    public void onCreate() {
+        Log.d(TAG, "onCreate");
+        LocalBroadcastManager.getInstance(getApplicationContext()).registerReceiver(location_receiver, new IntentFilter(LocationTracker.UPDATE_RECORD));
+    }
+
+    @Override
+    public synchronized int onStartCommand(Intent intent, int flags, int startId) {
+        Log.d(TAG, "Started!");
+        return START_STICKY;
+    }
+
+    private synchronized void send(final Context context) {
         if (send_buffer.size() == 0) return;
 
         JsonObject json = new JsonObject();
@@ -39,6 +71,8 @@ public class SyncService extends BroadcastReceiver {
             record.add("accuracy", gson.toJsonTree(r.accuracy));
             records.add(record);
         }
+        // FIXME only clear after they arrived
+        send_buffer.clear();
 
         SettingsManager settings = new SettingsManager(context);
 
@@ -75,19 +109,9 @@ public class SyncService extends BroadcastReceiver {
 
                         Intent intent = new Intent(SyncService.NEW_REMOTE_STATE);
                         intent.putExtra("players", players);
-                        context.sendBroadcast(intent);
+                        LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(intent);
                         // todo update internal state to server state
                     }
                 });
-    }
-
-    @Override
-    public void onReceive(Context context, Intent intent) {
-        switch (intent.getAction()) {
-            case LocationTracker.UPDATE_RECORD:
-                send_buffer.add((Record) intent.getParcelableExtra("record"));
-                send(context);
-                break;
-        }
     }
 }

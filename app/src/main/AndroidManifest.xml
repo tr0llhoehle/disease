@@ -20,6 +20,10 @@
             android:name=".LocationTracker"
             android:enabled="true"
             android:exported="true" />
+        <service
+            android:name=".SyncService"
+            android:enabled="true"
+            android:exported="true" />
 
         <receiver
             android:name=".OnBootReceiver"

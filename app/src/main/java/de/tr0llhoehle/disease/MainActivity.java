@@ -88,10 +88,12 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback {
             try {
                 TextView text = (TextView)findViewById(R.id.debug_display);
                 Player player = model.getPlayer();
+                Player[] other = model.getOther();
 
                 long timeDiff = (System.currentTimeMillis() - player.last_timestamp) / 1000;
                 text.setText("Server: " + settings.getServer() + "\n" +
                         "UserID: " + settings.getUserId() + "\n" +
+                        "Other players: " + (other == null ? 0 : other.length) + "\n" +
                         "Lat: " + player.lat + "\n" +
                         "Lon: " + player.lon + "\n" +
                         "Updated : " + timeDiff + "s ago\n");
@@ -130,7 +132,9 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback {
 
         tryInitializingCamera(true);
         startService(new Intent(this, LocationTracker.class));
-        LocalBroadcastManager.getInstance(getApplicationContext()).registerReceiver(model, new IntentFilter(LocationTracker.UPDATE_RECORD));
+        LocalBroadcastManager manager = LocalBroadcastManager.getInstance(getApplicationContext());
+        manager.registerReceiver(model, new IntentFilter(LocationTracker.UPDATE_RECORD));
+        manager.registerReceiver(model, new IntentFilter(SyncService.NEW_REMOTE_STATE));
         settings = new SettingsManager(getApplicationContext());
     }
 

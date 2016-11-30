@@ -3,7 +3,7 @@
 function migrate_v1_v2(db, callback) {
   console.error("migrating from v1 to v2 schema...");
   db.exec('BEGIN;' +
-         'CREATE TABLE locations (uid INTEGER, timestamp BIGINT, lon FLOAT, lat FLOAT, speed FLOAT, accuracy FLOAT, bearing FLOAT, PRIMARY KEY (uid, timestamp));' +
+         'CREATE TABLE players (uid INTEGER PRIMARY KEY, timestamp BIGINT, lon FLOAT, lat FLOAT);' +
          'PRAGMA user_version = 2;' +
          'COMMIT;', (err) => {
            if (err) return callback(err);
@@ -71,8 +71,9 @@ function setup(db, callback) {
         });
       } else if (result.user_version == 1) {
         migrate_v1_v2(db, callback)
-        callback();
+        return callback();
       }
+      callback();
     });
   });
 }

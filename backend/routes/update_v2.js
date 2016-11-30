@@ -10,6 +10,7 @@ class Update {
   }
 
   _insert_locations(uid, records) {
+    console.log("");
     // update historical location
     let location_values = records.map((r) => { return [uid, r.lon, r.lat, r.timestamp, r.accuracy, r.speed, r.bearing]; })
     let location_statement = this._db.prepare('INSERT INTO locations (uid, lon, lat, timestamp, accuracy, speed, bearing) VALUES (?, ?, ?, ?, ?, ?, ?)');
