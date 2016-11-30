@@ -13,7 +13,7 @@ public class OnBootReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        Log.d(TAG, "Connection suspended");
+        Log.d(TAG, "Booting");
 
         // start tracking service on boot
         Intent trackingIntent;

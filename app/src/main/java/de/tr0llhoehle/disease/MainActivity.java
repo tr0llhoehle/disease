@@ -1,8 +1,10 @@
 package de.tr0llhoehle.disease;
 
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.hardware.Camera;
 import android.os.Handler;
+import android.support.v4.content.LocalBroadcastManager;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.Window;
@@ -22,8 +24,9 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback {
     static final String TAG = "MainActivity";
     Camera camera;
     SurfaceView preview;
-    GameModel model;
-    Handler handler;
+    GameModel model = new GameModel();
+    Handler handler = new Handler();
+    SettingsManager settings;
 
     private void setCameraDisplayOrientation() {
         android.hardware.Camera.CameraInfo info =
@@ -84,16 +87,14 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback {
         public void run() {
             try {
                 TextView text = (TextView)findViewById(R.id.debug_display);
+                Player player = model.getPlayer();
 
-                GameModel gm = LocationTracker.getModel();
-                GameModel.State state = gm.getState();
-
-                long timediff = (System.currentTimeMillis() - state.timestamp) / 1000;
-                text.setText("Server: " + gm.getServer() + "\n" +
-                        "UserID: " + gm.getUser_id() + "\n" +
-                        "Lat: " + state.lat + "\n" +
-                        "Lon: " + state.lon + "\n" +
-                        "Updated : " + timediff + "s ago\n");
+                long timeDiff = (System.currentTimeMillis() - player.last_timestamp) / 1000;
+                text.setText("Server: " + settings.getServer() + "\n" +
+                        "UserID: " + settings.getUserId() + "\n" +
+                        "Lat: " + player.lat + "\n" +
+                        "Lon: " + player.lon + "\n" +
+                        "Updated : " + timeDiff + "s ago\n");
             } finally {
                 handler.postDelayed(refreshDebugDisplay, 1000);
             }
@@ -127,10 +128,10 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback {
             preview.getHolder().setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
         }
 
-        handler = new Handler();
-
         tryInitializingCamera(true);
         startService(new Intent(this, LocationTracker.class));
+        LocalBroadcastManager.getInstance(getApplicationContext()).registerReceiver(model, new IntentFilter(LocationTracker.UPDATE_RECORD));
+        settings = new SettingsManager(getApplicationContext());
     }
 
     @Override

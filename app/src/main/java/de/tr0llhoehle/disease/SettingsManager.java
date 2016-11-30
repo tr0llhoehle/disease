@@ -16,6 +16,8 @@ import java.security.NoSuchAlgorithmException;
 final class SettingsManager {
     private static final String TAG = "SettingsManager";
     public static final String APP_PREFS = "DiseasePrefs";
+    private static final String SERVER_STAGING = "http://192.168.178.189:5000";
+    private static final String SERVER_PRODUCTION = "http://tr0llhoehle.de:5000";
     SharedPreferences settings;
 
 
@@ -33,13 +35,18 @@ final class SettingsManager {
             e.printStackTrace();
         }
 
+
         this.settings.edit()
                      .putString("uid", uid)
+                     .putString("server", BuildConfig.DEBUG ? SERVER_STAGING : SERVER_PRODUCTION)
                      .apply();
     }
 
     public String getUserId() {
         return this.settings.getString("uid", "0");
+    }
+    public String getServer() {
+        return this.settings.getString("server", "0");
     }
 
     private String getHash(String input)

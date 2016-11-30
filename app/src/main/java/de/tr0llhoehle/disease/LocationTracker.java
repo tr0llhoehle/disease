@@ -6,6 +6,7 @@ import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.LocationListener;
 
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.app.Service;
 import android.content.Intent;
@@ -16,17 +17,16 @@ import android.os.Bundle;
 
 public class LocationTracker extends Service implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener {
     // all values in milliseconds
+    public static final String UPDATE_RECORD = "de.tr0llhoehle.disease.UPDATE_RECORD";
+
     private static final int UPDATE_INTERVAL = 1000;
     private static final int FASTEST_UPDATE_INTERVAL = 100;
     private static final String TAG = "LocationTracker";
-    private static final String SERVER_STAGING = "http://192.168.178.189:5000";
-    private static final String SERVER_PRODUCTION = "http://tr0llhoehle.de:5000";
 
-
+    private LocationFilter filter = new LocationFilter();
     private GoogleApiClient googleClient;
     private HandlerThread locationHandlerThread;
     private SettingsManager settings;
-    private static GameModel model;
 
     public LocationTracker() {
     }
@@ -41,19 +41,21 @@ public class LocationTracker extends Service implements GoogleApiClient.Connecti
         this.googleClient.connect();
     }
 
-    public static GameModel getModel() {
-        return model;
-    }
-
     @Override
     public void onCreate() {
         settings = new SettingsManager(getApplicationContext());
-        model = new GameModel(getApplicationContext(), BuildConfig.DEBUG ? SERVER_STAGING : SERVER_PRODUCTION, settings.getUserId());
     }
 
     @Override
     public synchronized void onLocationChanged(Location location) {
-        this.model.setLocation(location);
+        if (filter.useLocation(location)) {
+            Record record = new Record(location);
+
+            LocalBroadcastManager manager = LocalBroadcastManager.getInstance(getApplicationContext());
+            Intent update = new Intent(UPDATE_RECORD);
+            update.putExtra("state", record);
+            manager.sendBroadcast(new Intent(UPDATE_RECORD));
+        }
     }
 
     @Override

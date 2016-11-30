@@ -1,5 +1,7 @@
 package de.tr0llhoehle.disease;
 
+import android.location.Location;
+
 /**
  * Created by patrick on 11/28/16.
  *
@@ -14,7 +16,8 @@ public class LocationFilter {
     private double min_lat = 48.961060302461995;
     private double max_lat = 49.081512108641434;
 
-    public boolean useLocation(double lon, double lat) {
-        return lat > min_lat && lat < max_lat && lon > min_lon && lon < max_lon;
+    public boolean useLocation(Location location) {
+        return location.getLatitude() > min_lat && location.getLatitude() < max_lat &&
+                location.getLongitude() > min_lon && location.getLongitude() < max_lon;
     }
 }
