@@ -3,6 +3,7 @@
 const turf = require('@turf/turf');
 
 const PLAYER_RADIUS = 500; // meters
+const PLAYER_TIMEOUT = 60*1000; // 60 seconds
 
 class Update {
   constructor(db) {
@@ -14,7 +15,17 @@ class Update {
     // update historical location
     let location_values = records.map((r) => { return [uid, r.lon, r.lat, r.timestamp, r.accuracy, r.speed, r.bearing]; })
     let location_statement = this._db.prepare('INSERT INTO locations (uid, lon, lat, timestamp, accuracy, speed, bearing) VALUES (?, ?, ?, ?, ?, ?, ?)');
-    location_values.map(location_statement.run.bind(location_statement));
+    location_values.map((v) => {
+      location_statement.run(v, (error) => {
+        if (!error) return;
+
+        if (error.code === 'SQLITE_CONSTRAINT') {
+          console.error("Error: " + error.message);
+        } else {
+          throw error;
+        }
+      });
+    });
     location_statement.finalize();
   }
 
@@ -32,9 +43,10 @@ class Update {
     let min_lat = bounding_box[1];
     let max_lon = bounding_box[2];
     let max_lat = bounding_box[3];
+    let min_timestamp = +new Date() - PLAYER_TIMEOUT;
 
-    this._db.all('SELECT uid, lon, lat FROM players WHERE lat > ? AND lat < ? AND lon > ? AND lon < ? AND NOT uid = ?',
-                 [min_lat, max_lat, min_lon, max_lon, uid],
+    this._db.all('SELECT uid, lon, lat, timestamp FROM players WHERE lat > ? AND lat < ? AND lon > ? AND lon < ? AND NOT uid = ? AND timestamp > ?',
+                 [min_lat, max_lat, min_lon, max_lon, uid, min_timestamp],
                  (err, rows) => {
                    if (err) return callback(err);
 
@@ -67,6 +79,7 @@ class Update {
   }
 
   handle(req, res) {
+    console.error(JSON.stringify(req.body));
     let response = {};
     if (!this._validate(req.body, response)) {
       res.status(400);

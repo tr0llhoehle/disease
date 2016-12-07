@@ -13,9 +13,9 @@ app(config, (error, server) => {
   test('send update', (t) => {
     let query = {
         records: [
-          {lon: 5.1, lat: 54.000, timestamp: 10000000, bearing: 100, accuracy: 5, speed: 10},
-          {lon: 5.1, lat: 54.000, timestamp: 10000001, bearing: 100, accuracy: 5, speed: 10},
-          {lon: 5.1, lat: 54.000, timestamp: 10000002, bearing: 100, accuracy: 5, speed: 10}
+          {lon: 5.1, lat: 54.000, timestamp: +new Date() - 2000, bearing: 100, accuracy: 5, speed: 10},
+          {lon: 5.1, lat: 54.000, timestamp: +new Date() - 1000, bearing: 100, accuracy: 5, speed: 10},
+          {lon: 5.1, lat: 54.000, timestamp: +new Date(), bearing: 100, accuracy: 5, speed: 10}
         ]
     };
     let uid = 1;
@@ -29,11 +29,11 @@ app(config, (error, server) => {
 
   test('get correct players in radius', (t) => {
     let near_queries = [
-      { records: [{lon: 8.42315286397934,  lat: 49.01138015766177, timestamp: 10000000, bearing: 100, accuracy: 5, speed: 10}]},
-      { records: [{lon: 8.423195779323578, lat: 49.01152265957042, timestamp: 10000000, bearing: 100, accuracy: 5, speed: 10}]},
-      { records: [{lon: 8.42290610074997,  lat: 49.011348490515566, timestamp: 10000000, bearing: 100, accuracy: 5, speed: 10}]},
+      { records: [{lon: 8.42315286397934,  lat: 49.01138015766177, timestamp: +new Date(), bearing: 100, accuracy: 5, speed: 10}]},
+      { records: [{lon: 8.423195779323578, lat: 49.01152265957042, timestamp: +new Date(), bearing: 100, accuracy: 5, speed: 10}]},
+      { records: [{lon: 8.42290610074997,  lat: 49.011348490515566, timestamp: +new Date(), bearing: 100, accuracy: 5, speed: 10}]},
     ];
-    let far_query = { records: [{lon: 8.421803712844849, lat: 49.017565420659395, timestamp: 10000000, bearing: 100, accuracy: 5, speed: 10}]};
+    let far_query = { records: [{lon: 8.421803712844849, lat: 49.017565420659395, timestamp: +new Date(), bearing: 100, accuracy: 5, speed: 10}]};
 
     request.post(url + '/100', { json: near_queries[0] }, (error, response, body) => {
       t.notOk(error);
