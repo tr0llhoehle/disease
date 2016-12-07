@@ -4,7 +4,7 @@ set -e
 
 APP_DB="/var/db/db.sqlite"
 APP_KEY="/var/ssl/privkey.pem"
-APP_CERT="/var/ssl/cert.pem"
+APP_CERT="/var/ssl/fullchain.pem"
 REV=$(git rev-list --max-count=1 HEAD | cut -c1-8)
 VERSION=$(node -e "console.log(require('`pwd`/package.json').version)")
 IMAGE=tr0llhoehle/disease:${VERSION}-${REV}
