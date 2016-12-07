@@ -1,8 +1,13 @@
 package de.tr0llhoehle.disease;
 
+import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.hardware.Camera;
+import android.hardware.Sensor;
+import android.hardware.SensorManager;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorEvent;
 import android.os.Handler;
 import android.support.v4.content.LocalBroadcastManager;
 import android.view.SurfaceHolder;
@@ -20,13 +25,22 @@ import android.util.Log;
 
 import java.util.List;
 
-public class MainActivity extends Activity implements SurfaceHolder.Callback {
+public class MainActivity extends Activity implements SurfaceHolder.Callback, SensorEventListener {
     static final String TAG = "MainActivity";
     Camera camera;
     SurfaceView preview;
     GameModel model = new GameModel();
     Handler handler = new Handler();
     SettingsManager settings;
+
+    private SensorManager sensorManager;
+    private Sensor accSensor;
+    private Sensor fieldSensor;
+    private final float[] accelerometerReading = new float[3];
+    private final float[] magnetometerReading = new float[3];
+    private final float[] rotationMatrix = new float[9];
+    private final float[] orientationAngles = new float[3];
+
 
     private void setCameraDisplayOrientation() {
         android.hardware.Camera.CameraInfo info =
@@ -86,6 +100,9 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback {
         @Override
         public void run() {
             try {
+                updateOrientationAngles();
+
+
                 TextView text = (TextView)findViewById(R.id.debug_display);
                 Player player = model.getPlayer();
                 Player[] other = model.getOther();
@@ -96,7 +113,11 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback {
                         "Other players: " + (other == null ? 0 : other.length) + "\n" +
                         "Lat: " + player.lat + "\n" +
                         "Lon: " + player.lon + "\n" +
-                        "Updated : " + timeDiff + "s ago\n");
+                        "Updated : " + timeDiff + "s ago\n" +
+                        "Rotation : \n" +
+                        "\t" + rotationMatrix[0] + "," + rotationMatrix[1] + "," + rotationMatrix[2] + "\n" +
+                        "\t" + rotationMatrix[3] + "," + rotationMatrix[4] + "," + rotationMatrix[5] + "\n" +
+                        "\t" + rotationMatrix[6] + "," + rotationMatrix[7] + "," + rotationMatrix[8] + "\n");
             } finally {
                 handler.postDelayed(refreshDebugDisplay, 1000);
             }
@@ -136,6 +157,10 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback {
         manager.registerReceiver(model, new IntentFilter(LocationTracker.UPDATE_RECORD));
         manager.registerReceiver(model, new IntentFilter(SyncService.NEW_REMOTE_STATE));
         settings = new SettingsManager(getApplicationContext());
+
+        sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+        accSensor = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+        fieldSensor = sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
     }
 
     @Override
@@ -143,6 +168,11 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback {
         super.onResume();
         tryInitializingCamera(true);
         preview.setVisibility(View.VISIBLE);
+
+        sensorManager.registerListener(this, accSensor,
+                SensorManager.SENSOR_DELAY_NORMAL, SensorManager.SENSOR_DELAY_UI);
+        sensorManager.registerListener(this, fieldSensor,
+                SensorManager.SENSOR_DELAY_NORMAL, SensorManager.SENSOR_DELAY_UI);
     }
 
     @Override
@@ -154,6 +184,8 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback {
             camera.release();
             camera = null;
         }
+
+        sensorManager.unregisterListener(this);
     }
 
     @Override
@@ -165,6 +197,31 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback {
         }
         handler.removeCallbacks(refreshDebugDisplay);
     }
+
+    @Override
+    public void onAccuracyChanged(Sensor sensor, int accuracy) {
+    }
+
+    @Override
+    public void onSensorChanged(SensorEvent event) {
+        if (event.sensor == accSensor) {
+            System.arraycopy(event.values, 0, accelerometerReading,
+                    0, accelerometerReading.length);
+        }
+        else if (event.sensor == fieldSensor) {
+            System.arraycopy(event.values, 0, magnetometerReading,
+                    0, magnetometerReading.length);
+        }
+    }
+
+    public void updateOrientationAngles() {
+        sensorManager.getRotationMatrix(rotationMatrix, null,
+                accelerometerReading, magnetometerReading);
+
+        sensorManager.getOrientation(rotationMatrix, orientationAngles);
+    }
+
+
 
     @Override
     public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {

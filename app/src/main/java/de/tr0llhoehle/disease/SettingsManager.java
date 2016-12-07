@@ -14,6 +14,7 @@ import java.security.NoSuchAlgorithmException;
  */
 
 final class SettingsManager {
+    private static final boolean STAGYPROD = false;
     private static final String TAG = "SettingsManager";
     public static final String APP_PREFS = "DiseasePrefs";
     private static final String SERVER_STAGING = "http://192.168.178.189:5000";
@@ -26,7 +27,7 @@ final class SettingsManager {
 
         String uid = "0";
         try {
-            String android_id =Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID);
+            String android_id = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID);
             String shorted_hash = getHash(android_id).substring(0, 8);
 
             // we save this as string because that is what we will need for queries
@@ -38,7 +39,7 @@ final class SettingsManager {
 
         this.settings.edit()
                      .putString("uid", uid)
-                     .putString("server", BuildConfig.DEBUG ? SERVER_STAGING : SERVER_PRODUCTION)
+                     .putString("server", (BuildConfig.DEBUG && !STAGYPROD)? SERVER_STAGING : SERVER_PRODUCTION)
                      .apply();
     }
 
