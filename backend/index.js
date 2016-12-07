@@ -1,5 +1,8 @@
 'use strict';
 
+const http = require('http');
+const https = require('https');
+const fs = require('fs');
 const express = require('express');
 const sqlite = require('sqlite3');
 const d3 = require('d3-queue');
@@ -37,11 +40,19 @@ module.exports = (config, callback) => {
   q.awaitAll((error) => {
     if (error) return callback(error);
 
-    let server = app.listen(config.port , config.host);
-    server.on('close', () => {
+    let http_server = http.createServer(app);
+    http_server.on('close', () => {
       db.close();
     });
+    http_server.listen(config.port , config.host);
 
-    return callback(null, server);
+    let https_server = null;
+    if (config.key && config.crt) {
+      var privateKey  = fs.readFileSync(config.key, 'utf8');
+      var certificate = fs.readFileSync(config.crt, 'utf8');
+      https_server = https.createServer({key: privateKey, cert: certificate}, app);
+      https_server.listen(config.port+1, config.host);
+    }
+    return callback(null, http_server, https_server);
   });
 };

@@ -18,7 +18,7 @@ final class SettingsManager {
     private static final String TAG = "SettingsManager";
     public static final String APP_PREFS = "DiseasePrefs";
     private static final String SERVER_STAGING = "http://192.168.178.189:5000";
-    private static final String SERVER_PRODUCTION = "http://tr0llhoehle.de:5000";
+    private static final String SERVER_PRODUCTION = "https://disease.tr0llhoehle.de:5001";
     SharedPreferences settings;
 
 
