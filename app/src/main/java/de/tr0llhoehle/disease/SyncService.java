@@ -104,7 +104,8 @@ public class SyncService extends Service {
                             players[idx] = new Player(jsonPlayer.getAsJsonPrimitive("uid").getAsString(),
                                     jsonPlayer.getAsJsonPrimitive("lon").getAsDouble(),
                                     jsonPlayer.getAsJsonPrimitive("lat").getAsDouble(),
-                                    jsonPlayer.getAsJsonPrimitive("timestamp").getAsLong());
+                                    jsonPlayer.getAsJsonPrimitive("timestamp").getAsLong(),
+                                    jsonPlayer.getAsJsonPrimitive("state").getAsInt());
                         }
 
                         Intent intent = new Intent(SyncService.NEW_REMOTE_STATE);

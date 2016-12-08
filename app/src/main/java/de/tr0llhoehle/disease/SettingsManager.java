@@ -14,7 +14,7 @@ import java.security.NoSuchAlgorithmException;
  */
 
 final class SettingsManager {
-    private static final boolean STAGYPROD = false;
+    private static final boolean STAGYPROD = true;
     private static final String TAG = "SettingsManager";
     public static final String APP_PREFS = "DiseasePrefs";
     private static final String SERVER_STAGING = "http://192.168.178.189:5000";
@@ -36,10 +36,11 @@ final class SettingsManager {
             e.printStackTrace();
         }
 
+        String url = (BuildConfig.DEBUG && !STAGYPROD)? SERVER_STAGING : SERVER_PRODUCTION;
 
         this.settings.edit()
                      .putString("uid", uid)
-                     .putString("server", (BuildConfig.DEBUG && !STAGYPROD)? SERVER_STAGING : SERVER_PRODUCTION)
+                     .putString("server", url)
                      .apply();
     }
 

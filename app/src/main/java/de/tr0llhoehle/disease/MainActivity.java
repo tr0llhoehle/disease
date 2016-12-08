@@ -113,6 +113,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback, Se
                         "Other players: " + (other == null ? 0 : other.length) + "\n" +
                         "Lat: " + player.lat + "\n" +
                         "Lon: " + player.lon + "\n" +
+                        "State: " + player.state + "\n" +
                         "Updated : " + timeDiff + "s ago\n" +
                         "Rotation : \n" +
                         "\t" + rotationMatrix[0] + "," + rotationMatrix[1] + "," + rotationMatrix[2] + "\n" +

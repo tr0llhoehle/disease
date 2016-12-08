@@ -15,7 +15,7 @@ import android.util.Log;
 class GameModel extends BroadcastReceiver {
     private static final String TAG = "GameModel";
 
-    private Player current_player = new Player("not connected", 0, 0, 0);
+    private Player current_player = new Player("not connected", 0, 0, 0, 0);
     private Player[] other_players;
 
     private void updatePlayer(Record record) {
