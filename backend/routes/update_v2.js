@@ -2,8 +2,7 @@
 
 const turf = require('@turf/turf');
 
-const PLAYER_RADIUS = 500; // meters
-const PLAYER_TIMEOUT = 60*1000; // 60 seconds
+const constants = require('../src/constants');
 
 class Update {
   constructor(db) {
@@ -37,15 +36,15 @@ class Update {
 
   _get_nearby_players(uid, lon, lat, callback) {
     let player_location = turf.point([lon, lat]);
-    let circle_polygon = turf.circle(player_location, PLAYER_RADIUS / 1000., 10, 'kilometers');
+    let circle_polygon = turf.circle(player_location, constants.PLAYER_RADIUS / 1000., 10, 'kilometers');
     let bounding_box = turf.bbox(circle_polygon);
     let min_lon = bounding_box[0];
     let min_lat = bounding_box[1];
     let max_lon = bounding_box[2];
     let max_lat = bounding_box[3];
-    let min_timestamp = +new Date() - PLAYER_TIMEOUT;
+    let min_timestamp = +new Date() - constants.PLAYER_TIMEOUT;
 
-    this._db.all('SELECT uid, lon, lat, timestamp FROM players WHERE lat > ? AND lat < ? AND lon > ? AND lon < ? AND NOT uid = ? AND timestamp > ?',
+    this._db.all('SELECT uid, lon, lat, timestamp, state FROM players WHERE lat > ? AND lat < ? AND lon > ? AND lon < ? AND NOT uid = ? AND timestamp > ?',
                  [min_lat, max_lat, min_lon, max_lon, uid, min_timestamp],
                  (err, rows) => {
                    if (err) return callback(err);
@@ -53,10 +52,23 @@ class Update {
                    let players_in_radius = rows.filter((r) => {
                      let other_location = turf.point([r.lon, r.lat]);
                      let distance = turf.distance(player_location, other_location, 'kilometers') * 1000.;
-                     return distance <= PLAYER_RADIUS;
+                     return distance <= constants.PLAYER_RADIUS;
                    });
                    return callback(null, players_in_radius);
                  });
+  }
+
+  _update_player_state(uid, nearby, callback) {
+    this._db.get('SELECT state FROM players WHERE uid = ?', [uid], ((err, result) => {
+      if (err || !result) return callback(err);
+
+      let ret = player.update(result.state, nearby);
+
+      this._db.run('UPDATE player SET state = ? WHERE uid = ?', [ret.state, uid], (err) => {
+        if (err) return callback(err);
+        return callback(null, ret.events);
+      });
+    }).bind(this));
   }
 
   _validate(body, response) {
@@ -90,7 +102,7 @@ class Update {
     let last_record = req.body.records[req.body.records.length - 1];
     this._insert_locations(req.params.uid, req.body.records);
     this._update_player(req.params.uid, last_record.lon, last_record.lat, last_record.timestamp);
-    this._get_nearby_players(req.params.uid, last_record.lon, last_record.lat, (err, players) => {
+    this._get_nearby_players(req.params.uid, last_record.lon, last_record.lat, ((err, players) => {
       if (err) {
         res.status(500);
         response.error = "UpdateError";
@@ -100,8 +112,11 @@ class Update {
       }
 
       response.players = players;
-      res.json(response);
-    });
+      this._update_player_state(req.param.uid, players, (err, events) => {
+        response.events = events;
+        res.json(response);
+      });
+    }).bind(this));
   }
 };
 

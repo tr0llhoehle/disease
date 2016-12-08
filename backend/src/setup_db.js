@@ -1,5 +1,16 @@
 'use strict';
 
+function migrate_v2_v3(db, callback) {
+  console.error("migrating from v2 to v3 schema...");
+  db.exec('BEGIN;' +
+          'ALTER TABLE players ADD state INTEGER DEFAULT 0;' +
+         'PRAGMA user_version = 3;' +
+         'COMMIT;', (err) => {
+           if (err) return callback(err);
+           callback();
+         });
+}
+
 function migrate_v1_v2(db, callback) {
   console.error("migrating from v1 to v2 schema...");
   db.exec('BEGIN;' +
@@ -19,6 +30,18 @@ function migrate_v0_v1(db, callback) {
           'ALTER TABLE locations ADD bearing FLOAT;' +
           'PRAGMA user_version = 1;' +
           'COMMIT;', callback);
+}
+
+function setup_v3(db, callback) {
+  console.error("setting up schema v3...");
+  db.exec('BEGIN;' +
+         'CREATE TABLE players (uid INTEGER PRIMARY KEY, timestamp BIGINT, lon FLOAT, lat FLOAT, state INTEGER DEFAULT 0);' +
+         'CREATE TABLE locations (uid INTEGER, timestamp BIGINT, lon FLOAT, lat FLOAT, speed FLOAT, accuracy FLOAT, bearing FLOAT, PRIMARY KEY (uid, timestamp));' +
+         'PRAGMA user_version = 3;' +
+         'COMMIT;', (err) => {
+           if (err) return callback(err);
+           callback();
+         });
 }
 
 function setup_v2(db, callback) {
@@ -66,11 +89,14 @@ function setup(db, callback) {
               migrate_v1_v2(db, callback);
             });
           } else {
-            setup_v2(db, callback);
+            setup_v3(db, callback);
           }
         });
       } else if (result.user_version == 1) {
         migrate_v1_v2(db, callback)
+        return callback();
+      } else if (result.user_version == 2) {
+        migrate_v2_v3(db, callback)
         return callback();
       }
       callback();
