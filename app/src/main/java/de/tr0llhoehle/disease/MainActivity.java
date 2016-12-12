@@ -119,6 +119,8 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback, Se
                         "\t" + rotationMatrix[0] + "," + rotationMatrix[1] + "," + rotationMatrix[2] + "\n" +
                         "\t" + rotationMatrix[3] + "," + rotationMatrix[4] + "," + rotationMatrix[5] + "\n" +
                         "\t" + rotationMatrix[6] + "," + rotationMatrix[7] + "," + rotationMatrix[8] + "\n");
+
+                Notification.showNotification(getApplicationContext(), "Lat: " + player.lat + "\nLon: " + player.lon);
             } finally {
                 handler.postDelayed(refreshDebugDisplay, 1000);
             }
