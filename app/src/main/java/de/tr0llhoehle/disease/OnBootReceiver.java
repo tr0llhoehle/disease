@@ -19,5 +19,7 @@ public class OnBootReceiver extends BroadcastReceiver {
         Intent trackingIntent;
         trackingIntent = new Intent(context, LocationTracker.class);
         context.startService(trackingIntent);
+
+        de.tr0llhoehle.disease.Notification.showNotification(context);
     }
 }

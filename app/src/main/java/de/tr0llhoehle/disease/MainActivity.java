@@ -162,6 +162,8 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback, Se
         sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         accSensor = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         fieldSensor = sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
+
+        de.tr0llhoehle.disease.Notification.showNotification(this, "hi");
     }
 
     @Override
