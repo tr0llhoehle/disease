@@ -9,7 +9,7 @@ android {
         applicationId "de.tr0llhoehle.disease"
         minSdkVersion 19
         targetSdkVersion 22
-        versionCode 3
+        versionCode 4
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
