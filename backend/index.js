@@ -14,11 +14,14 @@ const UpdateV1 = require('./routes/update_v1');
 const UpdateV2 = require('./routes/update_v2');
 
 const setup_db = require('./src/setup_db');
+const schedule_jobs = require('./src/schedule_jobs');
+const GameModel = require('./src/model');
 
 module.exports = (config, callback) => {
   let db = new sqlite.Database(config.db_file);
+  let model = new GameModel(db);
   let update_v1 = new UpdateV1(db);
-  let update_v2 = new UpdateV2(db);
+  let update_v2 = new UpdateV2(model);
   let body_parser = bodyParser.json();
 
   let app = express();
@@ -40,6 +43,8 @@ module.exports = (config, callback) => {
   q.awaitAll((error) => {
     if (error) return callback(error);
 
+    let jobs = schedule_jobs(db);
+
     let http_server = http.createServer(app);
     http_server.on('close', () => {
       db.close();
@@ -53,6 +58,6 @@ module.exports = (config, callback) => {
       https_server = https.createServer({key: privateKey, cert: certificate}, app);
       https_server.listen(config.port+1, config.host);
     }
-    return callback(null, http_server, https_server);
+    return callback(null, http_server, https_server, jobs);
   });
 };

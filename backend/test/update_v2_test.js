@@ -7,7 +7,7 @@ const request = require('request');
 const config = {db_file: ':memory:', host: 'localhost', port: 5000};
 const url = `http://${config.host}:${config.port}/update/v2`;
 
-app(config, (error, server) => {
+app(config, (error, http_server, https_server, jobs) => {
   if (error) throw error;
 
   test('send update', (t) => {
@@ -66,7 +66,9 @@ app(config, (error, server) => {
   });
 
   test('teardown', (t) => {
-    server.close();
+    http_server.close();
+    if (https_server) https_server.close();
+    jobs.forEach((j) => { j.cancel(); })
     t.end();
   });
 });
