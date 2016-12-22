@@ -65,18 +65,17 @@ class GameModel {
                  });
   }
 
-  // TODO this needs to be split into model-controller parts
-  update_player_state(uid, nearby, callback) {
-    this._db.get('SELECT state FROM players WHERE uid = ?', [uid], ((err, result) => {
-      if (err || !result) return callback(err);
+  get_player(uid, callback) {
+    this._db.get('SELECT uid, timestamp, lon, lat, state FROM players WHERE uid = ?', [uid], (err, result) => {
+      if (err) return callback(err);
+      if (!result) return callback(new Error("No player with " + uid + " found."));
 
-      let ret = player.update(result.state, nearby);
+      return callback(null, result);
+    });
+  }
 
-      this._db.run('UPDATE player SET state = ? WHERE uid = ?', [ret.state, uid], (err) => {
-        if (err) return callback(err);
-        return callback(null, ret.events);
-      });
-    }).bind(this));
+  update_player_state(uid, state, callback) {
+    this._db.run('UPDATE players SET state = ? WHERE uid = ?', [state, uid], callback);
   }
 
   reset_daily_stats(callback) {

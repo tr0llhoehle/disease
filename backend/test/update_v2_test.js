@@ -23,6 +23,7 @@ app(config, (error, http_server, https_server, jobs) => {
       t.notOk(error);
       t.equal(response.statusCode, 200);
       t.notOk(body.error);
+      t.notOk(body.message);
       t.end();
     })
   });
