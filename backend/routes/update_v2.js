@@ -1,6 +1,6 @@
 'use strict';
 
-const player = require('../src/player');
+const state = require('../src/state');
 
 const d3 = require('d3-queue');
 
@@ -41,7 +41,7 @@ class Update {
 
     let q = d3.queue(1);
     q.defer(this._model.insert_locations.bind(this._model), req.params.uid, req.body.records);
-    q.defer(this._model.update_player.bind(this._model), req.params.uid, last_record.lon, last_record.lat, last_record.timestamp);
+    q.defer(this._model.update_player.bind(this._model), req.params.uid, last_record.lon, last_record.lat, last_record.timestamp, null);
     q.defer(this._model.get_player.bind(this._model), req.params.uid);
     q.defer(this._model.get_nearby_players.bind(this._model), req.params.uid, last_record.lon, last_record.lat);
     q.awaitAll(((err, results) => {
@@ -53,7 +53,7 @@ class Update {
       let current_player = results.slice(-2, -1)[0];
       let players = results.slice(-1)[0];
 
-      let ret = player.update(current_player, players);
+      let ret = state.update(current_player, players);
 
       response.players = players;
       response.events = ret.events;

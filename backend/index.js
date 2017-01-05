@@ -12,6 +12,8 @@ const cors = require('cors');
 
 const UpdateV1 = require('./routes/update_v1');
 const UpdateV2 = require('./routes/update_v2');
+const ActionV1 = require('./routes/action_v1');
+const DebugV1 = require('./routes/debug_v1');
 
 const setup_db = require('./src/setup_db');
 const schedule_jobs = require('./src/schedule_jobs');
@@ -22,6 +24,8 @@ module.exports = (config, callback) => {
   let model = new GameModel(db);
   let update_v1 = new UpdateV1(db);
   let update_v2 = new UpdateV2(model);
+  let action_v1 = new ActionV1(model);
+  let debug_v1 = new DebugV1(model);
   let body_parser = bodyParser.json();
 
   let app = express();
@@ -36,6 +40,10 @@ module.exports = (config, callback) => {
 
   app.post('/update/v1/:uid', body_parser, update_v1.handle.bind(update_v1));
   app.post('/update/v2/:uid', body_parser, update_v2.handle.bind(update_v2));
+  app.post('/action/v1/:uid', body_parser, action_v1.handle.bind(action_v1));
+  if (config.debug) {
+    app.post('/debug/v1/:uid', body_parser, debug_v1.handle.bind(debug_v1));
+  }
 
   let q = d3.queue(1);
   q.defer(setup_db, db);

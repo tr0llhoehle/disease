@@ -1,12 +1,12 @@
 'use strict';
 
 const test = require('tape');
-const player = require('../src/player');
+const state = require('../src/state');
 const constants = require('../src/constants');
 
 test('only humans', (t) => {
   let current_player = { state: constants.PLAYER_STATE_HUMAN, lon: 13, lat: 37, uid: 0 };
-  let ret = player.update(current_player, [
+  let ret = state.update(current_player, [
     { state: constants.PLAYER_STATE_HUMAN, lon: 13, lat: 37, uid: 1 },
     { state: constants.PLAYER_STATE_HUMAN, lon: 13, lat: 37, uid: 2 },
     { state: constants.PLAYER_STATE_HUMAN, lon: 13, lat: 37, uid: 3 }
@@ -18,7 +18,7 @@ test('only humans', (t) => {
 
 test('only zombies', (t) => {
   let current_player = { state: constants.PLAYER_STATE_ZOMBIE, lon: 13, lat: 37, uid: 0 };
-  let ret = player.update(current_player, [
+  let ret = state.update(current_player, [
     { state: constants.PLAYER_STATE_ZOMBIE, lon: 13, lat: 37, uid: 1 },
     { state: constants.PLAYER_STATE_ZOMBIE, lon: 13, lat: 37, uid: 2 },
     { state: constants.PLAYER_STATE_ZOMBIE, lon: 13, lat: 37, uid: 3 }
@@ -30,7 +30,7 @@ test('only zombies', (t) => {
 
 test('zombies around human', (t) => {
   let current_player = { state: constants.PLAYER_STATE_HUMAN, lon: 13, lat: 37, uid: 0 };
-  let ret = player.update(current_player, [
+  let ret = state.update(current_player, [
     { state: constants.PLAYER_STATE_ZOMBIE, lon: 13, lat: 37, uid: 1 },
     { state: constants.PLAYER_STATE_ZOMBIE, lon: 13, lat: 37, uid: 2 },
     { state: constants.PLAYER_STATE_ZOMBIE, lon: 13, lat: 37, uid: 3 },
@@ -44,7 +44,7 @@ test('zombies around human', (t) => {
 
 test('humans around zombies', (t) => {
   let current_player = { state: constants.PLAYER_STATE_ZOMBIE, lon: 13, lat: 37, uid: 0 };
-  let ret = player.update(current_player, [
+  let ret = state.update(current_player, [
     { state: constants.PLAYER_STATE_HUMAN, lon: 13, lat: 37, uid: 1 },
     { state: constants.PLAYER_STATE_HUMAN, lon: 13, lat: 37, uid: 2 },
     { state: constants.PLAYER_STATE_HUMAN, lon: 13, lat: 37, uid: 3 },

@@ -3,7 +3,7 @@
 const app = require('.');
 const sqlite3 = require('sqlite3')
 
-let config = {db_file: process.env.APP_DB || 'db_staging.sqlite', host: '0.0.0.0', port: process.env.PORT || 5000, crt: process.env.APP_CERT, key: process.env.APP_KEY}
+let config = {db_file: process.env.APP_DB || 'db_staging.sqlite', host: '0.0.0.0', port: process.env.PORT || 5000, crt: process.env.APP_CERT, key: process.env.APP_KEY, debug: process.env.APP_DEBUG}
 
 app(config, (error, http_server, https_server) => {
   if (error) throw error;

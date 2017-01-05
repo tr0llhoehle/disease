@@ -3,7 +3,7 @@
 const turf = require('@turf/turf');
 const d3 = require('d3-queue');
 
-const player = require('./player');
+const state = require('./state');
 const constants = require('./constants');
 
 class GameModel {
@@ -35,10 +35,14 @@ class GameModel {
     });
   }
 
-  update_player(uid, lon, lat, timestamp, callback) {
-    // update current player location
-    this._db.run('INSERT OR REPLACE INTO players (uid, timestamp, lon, lat) VALUES(?, ?, ?, ?)',
-                 [uid, timestamp, lon, lat], callback);
+  update_player(uid, lon, lat, timestamp, state, callback) {
+    if (state == null) {
+      this._db.run('INSERT OR REPLACE INTO players (uid, timestamp, lon, lat) VALUES(?, ?, ?, ?)',
+                   [uid, timestamp, lon, lat], callback);
+    } else {
+      this._db.run('INSERT OR REPLACE INTO players (uid, timestamp, lon, lat, state) VALUES(?, ?, ?, ?, ?)',
+                   [uid, timestamp, lon, lat, state], callback);
+    }
   }
 
   get_nearby_players(uid, lon, lat, callback) {
@@ -75,6 +79,7 @@ class GameModel {
   }
 
   update_player_state(uid, state, callback) {
+    console.log(uid + ' : ' + state);
     this._db.run('UPDATE players SET state = ? WHERE uid = ?', [state, uid], callback);
   }
 
